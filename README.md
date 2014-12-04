@@ -1,7 +1,7 @@
 # TrilhaSP
 This is a WIP (Working in Progress) cross-platform mobile app.
 This app uses [Ionic Framework][2] as bootstrap for Native/Hybrid app using HTML,
-CSS and Javascript on top of Cordova[4] e Angularjs[6].
+CSS and Javascript on top of [Cordova][4] e [Angularjs][6].
 
 ## Dependencies
 General
@@ -43,9 +43,10 @@ After that, you'll need to add the targets platforms: `ionic platform add androi
 For iOS, you'll need a OSX with XCode
 
 Install plugins:
-`cordova plugin add com.ionic.keyboard org.apache.cordova.camera org.apache.cordova.device com.phonegap.plugins.barcodescanner org.apache.cordova.console org.apache.cordova.geolocation`
 
-`cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
+	`cordova plugin add com.ionic.keyboard org.apache.cordova.camera org.apache.cordova.device com.phonegap.plugins.barcodescanner org.apache.cordova.console org.apache.cordova.geolocation`
+
+	`cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
 
 ## TODO
 Automatize installation, platform and plugin addition.
@@ -63,24 +64,29 @@ Automatize installation, platform and plugin addition.
 
 ## Bugs
 Background Mode only works if you install from git:
+
     `cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
 
 Custom properties on Background-mode plugins just works on first build run.
 After that, fallbacks to default text.
 
 Just use:
+
 	`cordova plugin remove de.appplant.cordova.plugin.background-mode`
+
 and add it back:
+
 	`cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
+
 build it again:
 
-`cordova build android`
-or
-`cordova run android`
+	`cordova build android` or `cordova run android`
 
 ## Resources
 [Ionic Framework][2] [Docs][3]
+
 [Cordova][4] [Docs][5]
+
 [Angularjs][6] [Tutorial][7] & [Docs][8]
 
 ## License
