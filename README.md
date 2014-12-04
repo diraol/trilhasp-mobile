@@ -54,11 +54,14 @@ Automatize installation, platform and plugin addition.
 	#!/bin/bash
 	# Node dependencies
 	`npm install`
+
 	# Add Android as a development platform
 	`ionic platform add android`
+
 	#Plugin install
-	`cordova plugin add com.ionic.keyboard org.apache.cordova.camera >org.apache.cordova.device com.phonegap.plugins.barcodescanner org.apache.cordova.console >org.apache.cordova.geolocation`
+	`cordova plugin add com.ionic.keyboard org.apache.cordova.camera org.apache.cordova.device com.phonegap.plugins.barcodescanner org.apache.cordova.console org.apache.cordova.geolocation`
 	`cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
+
 	# Build
 	`cordova build android`
 
