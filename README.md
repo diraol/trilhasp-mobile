@@ -5,27 +5,30 @@ CSS and Javascript on top of Cordova[4] e Angularjs[6].
 
 ## Dependencies
 General
-    Node.js
-    Android SDK
-    Apache Ant
+
+	Node.js
+	Android SDK
+	Apache Ant
 
 Gulp
-    bower
-    gulp-util
-    gulp-concat
-    gulp-sass
-    gulp-minify-css
-    gulp-rename
-    shelljs
+
+	bower
+	gulp-util
+	gulp-concat
+	gulp-sass
+	gulp-minify-css
+	gulp-rename
+	shelljs
 
 Cordova/Ionic
-    com.ionic.keyboard 1.0.3 "Keyboard"
-    org.apache.cordova.camera 0.3.3 "Camera"
-    org.apache.cordova.device 0.2.12 "Device"
-    com.phonegap.plugins.barcodescanner 2.0.1 "BarcodeScanner"
-    de.appplant.cordova.plugin.background-mode 0.6.0-dev "BackgroundMode"
-    org.apache.cordova.console 0.2.11 "Console"
-    org.apache.cordova.geolocation 0.3.10 "Geolocation"
+
+	com.ionic.keyboard 1.0.3 "Keyboard"
+	org.apache.cordova.camera 0.3.3 "Camera"
+	org.apache.cordova.device 0.2.12 "Device"
+	com.phonegap.plugins.barcodescanner 2.0.1 "BarcodeScanner"
+	de.appplant.cordova.plugin.background-mode 0.6.0-dev "BackgroundMode"
+	org.apache.cordova.console 0.2.11 "Console"
+	org.apache.cordova.geolocation 0.3.10 "Geolocation"
 
 
 ## Install
@@ -47,16 +50,16 @@ Install plugins:
 ## TODO
 Automatize installation, platform and plugin addition.
 
-    \#!/bin/bash
-    \# Node dependencies
-    \`npm install\`
-    \# Add Android as a development platform
-    \`ionic platform add android\`
-    \#Plugin install
-    \`cordova plugin add com.ionic.keyboard org.apache.cordova.camera >org.apache.cordova.device com.phonegap.plugins.barcodescanner org.apache.cordova.console >org.apache.cordova.geolocation\`
-    \`cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git\`
-    \# Build
-    \`cordova build android\`
+	#!/bin/bash
+	# Node dependencies
+	`npm install`
+	# Add Android as a development platform
+	`ionic platform add android`
+	#Plugin install
+	`cordova plugin add com.ionic.keyboard org.apache.cordova.camera >org.apache.cordova.device com.phonegap.plugins.barcodescanner org.apache.cordova.console >org.apache.cordova.geolocation`
+	`cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
+	# Build
+	`cordova build android`
 
 ## Bugs
 Background Mode only works if you install from git:
@@ -66,14 +69,14 @@ Custom properties on Background-mode plugins just works on first build run.
 After that, fallbacks to default text.
 
 Just use:
-    `cordova plugin remove de.appplant.cordova.plugin.background-mode`
+	`cordova plugin remove de.appplant.cordova.plugin.background-mode`
 and add it back:
-    `cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
+	`cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
 build it again:
 
-    `cordova build android`
+`cordova build android`
 or
-    `cordova run android`
+`cordova run android`
 
 ## Resources
 [Ionic Framework][2] [Docs][3]
