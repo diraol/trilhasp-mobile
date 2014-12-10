@@ -1,0 +1,22 @@
+/* Empty. Add your own CSS if you like */
+
+.scroll {
+    height: 100%;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+input[type="range"] {
+  width: 100%;
+}
+
+.extra {
+  display: none;
+}
+
+textarea {
+  border: 1px solid #ccc;
+}
