@@ -4,159 +4,151 @@
 // 'trilhasp' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'trilhasp' is found in controllers.js
-var app = angular.module('trilhasp', ['ionic', 'leaflet-directive', 'ngCordova', 'ngResource', 'ngCookies', 'trilhasp.controllers', 'trilhasp.auth']);
+var app = angular.module('trilhasp', ['ionic', 'leaflet-directive', 'ngCordova', 'ngResource', 'ngCookies', 'trilhasp.services', 'trilhasp.controllers']);
 
-//var appController = angular.module('trilhasp.controllers', []);
-//var appServices = angular.module('trilhasp.services, []');
+var appControllers = angular.module('trilhasp.controllers', []);
+var appServices = angular.module('trilhasp.services', []);
 
-//var options = {};
-//options.api = {};
-//options.api.base_url = "http://api.trilhasp.datapublika.com/v1/";
+var options = {};
+options.api = {};
+options.api.auth = {}
+options.api.base_url = "http://api.trilhasp.datapublika.com/v1/";
+options.api.auth.base_url = "http://api.trilhasp.datapublika.com/";
+options.api.auth.client_id = "a";
+options.api.auth.client_secret = "a";
 
-app.config(function(
-  $stateProvider,
-  $locationProvider,
-  $httpProvider,
-  $urlRouterProvider) {
+app.config(['$stateProvider',
+  '$locationProvider',
+  '$httpProvider',
+  '$urlRouterProvider',
+  function(
+    $stateProvider,
+    $locationProvider,
+    $httpProvider,
+    $urlRouterProvider) {
 
-  $stateProvider
+    $stateProvider
 
-    .state('app', {
-    url: "/app",
-    abstract: true,
-    templateUrl: "templates/menu.html",
-    controller: 'AppCtrl'
-  })
+      .state('app', {
+      url: "/app",
+      abstract: true,
+      templateUrl: "templates/menu.html",
+      controller: 'AppCtrl',
+    })
 
-  .state('app.search', {
-    url: "/search",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/search.html"
-      }
-    }
-  })
+    .state('login', {
+      url: '/login',
+      templateUrl: 'templates/login.html',
+      controller: 'UserCtrl'
+    })
 
-  .state('app.browse', {
-      url: "/browse",
+    .state('logout', {
+        url: '/logout',
+        views: {
+            controller: 'LogoutCtrl'
+        }
+    })
+
+    .state('app.avaliacao', {
+      url: "/avaliacao",
       views: {
         'menuContent': {
-          templateUrl: "templates/browse.html"
+          templateUrl: "templates/avaliacao.html",
+          controller: 'AvCtrl',
         }
       }
     })
-    .state('app.playlists', {
-      url: "/playlists",
+
+    .state('app.avaliacao.geral', {
+      url: '/avaliacao/geral',
       views: {
         'menuContent': {
-          templateUrl: "templates/playlists.html",
-          controller: 'PlaylistsCtrl'
+          templateUrl: 'templates/avaliacao_geral.html',
+          controller: 'AvGeralCtrl',
+        }
+      },
+      parent: 'app.avaliacao'
+    })
+
+    .state('app.avaliacao.especifica', {
+      url: '/avaliacao/especifica',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/avaliacao_especifica.html',
+          controller: 'AvEspecificaCtrl',
+        }
+      },
+      parent: 'app.avaliacao.geral'
+    })
+
+    .state('app.map', {
+      url: "/map",
+      views: {
+        'menuContent': {
+          templateUrl: "templates/map.html",
+        }
+      },
+      controller: 'MapCtrl',
+    })
+
+    .state('app.game', {
+      url: "/game",
+      views: {
+        'menuContent': {
+          templateUrl: "templates/game.html",
+          controller: 'GameCtrl',
         }
       }
     })
 
-  .state('app.single', {
-    url: "/playlists/:playlistId",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/playlist.html",
-        controller: 'PlaylistCtrl'
+    .state('app.home', {
+      url: '/home',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/main.html',
+          controller: 'HomeCtrl',
+        }
       }
-    }
-  })
+    });
 
-  .state('app.map', {
-    url: "/map",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/map.html",
-        controller: 'MapCtrl'
-      }
-    }
-  })
+    // if none of the above states are matched, use this as the fallback
+    $urlRouterProvider.otherwise('/login');
+  }
+]);
 
-  .state('app.avaliacao', {
-    url: "/avaliacao",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/avaliacao.html",
-        controller: 'AvCtrl'
-      }
-    }
-  })
+app.config(function($httpProvider) {
+  //AUTH
+  //$httpProvider.defaults.headers.post['Access-Control-Max-Age'] = '1728000';
 
-  .state('app.game', {
-    url: "/game",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/game.html",
-        controller: 'GameCtrl'
-      }
-    }
-  })
-
-  .state('app.home', {
-    url: '/home',
-    views: {
-      'menuContent': {
-        templateUrl: 'templates/main.html',
-        controller: 'HomeCtrl'
-      }
-    }
-  });
-
-  // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/home');
-
-  $httpProvider.defaults.useXDomain = true;
+  delete $httpProvider.defaults.headers.post['X-Requested-With'];
   $httpProvider.defaults.withCredentials = true;
-  delete $httpProvider.defaults.headers.common['X-Requested-With'];
+  $httpProvider.defaults.useXDomain = true;
+  $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+  $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
   $httpProvider.defaults.headers.post['Accept'] = 'application/json, text/javascript';
   $httpProvider.defaults.headers.post['Content-Type'] = 'application/json; charset=utf-8';
-  $httpProvider.defaults.headers.post['Access-Control-Max-Age'] = '1728000';
-
+  $httpProvider.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
+  //$httpProvider.defaults.headers.post['X-Requested-With'] = 'XMLHttpRequest';
+  //$httpProvider.interceptors.push('TokenInterceptor');
 });
 
-angular.module('trilhasp')
-  .provider('myCSRF', [
-
-    function() {
-      var headerName = 'X-CSRFToken';
-      var cookieName = 'csrftoken';
-      var allowedMethods = ['GET'];
-
-      this.setHeaderName = function(n) {
-        headerName = n;
-      }
-      this.setCookieName = function(n) {
-        cookieName = n;
-      }
-      this.setAllowedMethods = function(n) {
-        allowedMethods = n;
-      }
-      this.$get = ['$cookies',
-        function($cookies) {
-          return {
-            'request': function(config) {
-              if (allowedMethods.indexOf(config.method) === -1) {
-                // do something on success
-                config.headers[headerName] = $cookies[cookieName];
-              }
-              return config;
-            }
-          }
-        }
-      ];
-    }
-  ]).config(function($httpProvider) {
-    $httpProvider.interceptors.push('myCSRF');
-  });
-
-app.run(function($ionicPlatform, $http, $cookies) {
+app.run(function($ionicPlatform, $rootScope, $location, $window, AuthenticationService, $http, $cookies) {
   $ionicPlatform.ready(function() {
-
-    //AUTH
-    $http.defaults.headers.post['X-CSRFToken'] = $cookies.csrftoken;
+    //if ($window.sessionStorage.token) {
+    //$http.defaults.headers.post['X-CSRFToken'] = $window.sessionStorage.token; //$cookies['csrftoken'];
+    //}
+    $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
+      if (nextRoute != null &&
+        !$window.sessionStorage.isAuthenticated && !$window.sessionStorage.token) {
+        //redirect only if both isAuthenticated is false and no token is set
+        $event.preventDefault();
+        $location.path('app.login');
+      } else if (nextRoute == 'app.avaliacao.geral' && currentRoute != 'app.avaliacao') {
+        $state.go('app.avaliacao');
+      } else if (nextRoute == 'app.avaliacao.especifica' && currentRoute != 'app.avaliacao.geral') {
+        $state.go('app.avaliacao');
+      }
+    });
 
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)

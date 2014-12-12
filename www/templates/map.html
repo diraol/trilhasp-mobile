@@ -6,10 +6,9 @@
     </ion-nav-buttons>
     <ion-content data-tap-disabled="true" class="has-header" ng-controller="MapCtrl">
         <div id="autoLocationControl">
-            <button class="button" ng-click="showusers();"></button>
             <button class="button button-icon icon ion-pinpoint" ng-click="map.center.autoDiscover=true;map.center.zoom=18"></button>
         </div>
         </form>
-        <leaflet defaults="map.defaults" center="map.center" markers="map.markers" ng-if="map"></leaflet>
+        <leaflet defaults="map.defaults" center="map.center" markers="map.markers" layers="map.layers" ng-if="map"></leaflet>
     </ion-content>
 </ion-view>
