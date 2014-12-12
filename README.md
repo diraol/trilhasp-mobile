@@ -25,7 +25,7 @@ Cordova/Ionic
 	com.ionic.keyboard 1.0.3 "Keyboard"
 	org.apache.cordova.camera 0.3.3 "Camera"
 	org.apache.cordova.device 0.2.12 "Device"
-	com.phonegap.plugins.barcodescanner 2.0.1 "BarcodeScanner"
+	https://github.com/wildabeast/BarcodeScanner.git "BarcodeScanner"
 	de.appplant.cordova.plugin.background-mode 0.6.0-dev "BackgroundMode"
 	org.apache.cordova.console 0.2.11 "Console"
 	org.apache.cordova.geolocation 0.3.10 "Geolocation"
@@ -44,7 +44,7 @@ For iOS, you'll need a OSX with XCode
 
 Install plugins:
 
-	`cordova plugin add com.ionic.keyboard org.apache.cordova.camera org.apache.cordova.device com.phonegap.plugins.barcodescanner org.apache.cordova.console org.apache.cordova.geolocation`
+	`cordova plugin add com.ionic.keyboard org.apache.cordova.camera org.apache.cordova.device https://github.com/wildabeast/BarcodeScanner.git org.apache.cordova.console org.apache.cordova.geolocation`
 
 	`cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
 
@@ -59,7 +59,7 @@ Automatize installation, platform and plugin addition.
 	`ionic platform add android`
 
 	#Plugin install
-	`cordova plugin add com.ionic.keyboard org.apache.cordova.camera org.apache.cordova.device com.phonegap.plugins.barcodescanner org.apache.cordova.console org.apache.cordova.geolocation`
+	`cordova plugin add com.ionic.keyboard org.apache.cordova.camera org.apache.cordova.device https://github.com/wildabeast/BarcodeScanner.git org.apache.cordova.console org.apache.cordova.geolocation`
 	`cordova plugin add https://github.com/katzer/cordova-plugin-background-mode.git`
 
 	# Build
