@@ -319,7 +319,7 @@ appControllers.controller('AvGeralCtrl', ['$scope', '$state', '$ionicViewService
 
     $scope.change = function(avaliacao) {
       evaluation.general.value = avaliacao.value;
-      evaluation.general.text = avaliacao.txt || '';
+      evaluation.general.text = avaliacao.text || '';
       if (avaliacao.value >= 50) {
         $scope.avaliacaoTxtHide = true;
       } else {
@@ -327,15 +327,9 @@ appControllers.controller('AvGeralCtrl', ['$scope', '$state', '$ionicViewService
       }
     };
 
-    function _save(avaliacao) {
-    }
-
     $scope.endEval = function(avaliacao) {
-      evaluation.general.value = avaliacao.value;
       if (evaluation.general.value >= 50) {
         evaluation.general.text = '';
-      } else {
-        evaluation.general.text = avaliacao.text;
       }
       $window.sessionStorage.evaluation = JSON.stringify(evaluation);
       $state.go('app.home', {}, {
@@ -344,11 +338,8 @@ appControllers.controller('AvGeralCtrl', ['$scope', '$state', '$ionicViewService
     }
 
     $scope.nextEval = function(avaliacao) {
-      evaluation.general.value = avaliacao.value;
       if (evaluation.general.value >= 50) {
         evaluation.general.text = '';
-      } else {
-        evaluation.general.text = avaliacao.text;
       }
       $window.sessionStorage.evaluation = JSON.stringify(evaluation);
       $state.go('app.avaliacaoespecifica', {}, {

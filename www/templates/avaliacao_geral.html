@@ -19,7 +19,7 @@
             </label>
             <div ng-hide="avaliacaoTxtHide" class="card avaliacao">
                 <label class="item item-input">
-                    <textarea id="avaliacao-geral-text" placeholder="Descreva o motivo da nota negativa." ng-model='avaliacao.text'></textarea>
+                    <textarea id="avaliacao-geral-text" placeholder="Descreva o motivo da nota negativa." ng-model='avaliacao.text' ng-change="change(avaliacao)"></textarea>
                 </label>
             </div>
         </ion-content>
