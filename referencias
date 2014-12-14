@@ -1,6 +1,42 @@
+#### LEAFLET ####
 http://calendee.com/2014/10/25/maps-app-using-ionic-framework-and-leaflet-js/
 https://github.com/calendee/ionic-leafletjs-map-demo
 https://github.com/tombatossals/angular-leaflet-directive/blob/master/examples/center-autodiscover-example.html
 
 
+### AUTH ###
+http://www.kdelemme.com/2014/03/09/authentication-with-angularjs-and-a-node-js-rest-api/
+https://github.com/kdelemme/blogjs/blob/master/app/js/app.js
+https://github.com/auth0/angular-token-auth/blob/master/auth.client.js
+http://ionicframework.com/blog/angularjs-authentication/
+http://jonsamwell.com/url-route-authorization-and-security-in-angular/
+https://github.com/jonsamwell/blog_examples/tree/master/angular-route-authorisation
+http://jamesbrewer.io/2014/09/22/json-web-token-authentication-part-one/
+http://jamesbrewer.io/2014/10/31/json-web-token-authentication-part-two/
+https://github.com/brwr/django-angular-token-auth/tree/master/static/javascripts
+https://medium.com/opinionated-angularjs/techniques-for-authentication-in-angularjs-applications-7bbf0346acec
+http://stackoverflow.com/questions/20969835/angularjs-login-and-authentication-in-each-route-and-controller
+http://www.kdmooreconsulting.com/blogs/authentication-with-ionic-and-angular-js-in-a-cordovaphonegap-mobile-web-application/
+
+
+### CORS ###
+https://github.com/ottoyiu/django-cors-headers
+https://gist.github.com/algal/5480916
+http://stackoverflow.com/questions/24363907/angularjs-cors-request-custom-headers
+http://stackoverflow.com/questions/25914071/cors-cordova-angularjs-http-and-file-confusion/25914800#25914800
+http://stackoverflow.com/questions/22537311/angular-ui-router-login-authentication
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
+http://stackoverflow.com/questions/18156452/django-csrf-token-angularjs
+http://enable-cors.org/server_nginx.html
+
+#### CURL TO TEST CSRF ####
+http://stackoverflow.com/questions/10628275/how-to-use-curl-with-django-csrf-tokens-and-post-requests
+
+### ANGULAR ROUTER ###
+https://github.com/angular-ui/ui-router/wiki
+https://github.com/angular-ui/ui-router/wiki/Quick-Reference#stategoto--toparams--options
+
+
+### DJANGO-OAUTH-REST ###
+https://github.com/evonove/django-oauth-toolkit/blob/master/docs/rest-framework/getting_started.rst
 

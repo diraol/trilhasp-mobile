@@ -43,10 +43,10 @@ app.config(['$stateProvider',
     })
 
     .state('logout', {
-        url: '/logout',
-        views: {
-            controller: 'LogoutCtrl'
-        }
+      url: '/logout',
+      views: {
+        controller: 'LogoutCtrl'
+      }
     })
 
     .state('app.avaliacao', {
@@ -54,31 +54,29 @@ app.config(['$stateProvider',
       views: {
         'menuContent': {
           templateUrl: "templates/avaliacao.html",
-          controller: 'AvCtrl',
+          controller: 'AvCtrl', //QRCode
         }
       }
     })
 
-    .state('app.avaliacao.geral', {
-      url: '/avaliacao/geral',
+    .state('app.avaliacaogeral', {
+      url: '/avaliacao/geral/',
       views: {
         'menuContent': {
           templateUrl: 'templates/avaliacao_geral.html',
           controller: 'AvGeralCtrl',
         }
-      },
-      parent: 'app.avaliacao'
+      }
     })
 
-    .state('app.avaliacao.especifica', {
-      url: '/avaliacao/especifica',
+    .state('app.avaliacaoespecifica', {
+      url: '/avaliacao/especifica/:busId',
       views: {
         'menuContent': {
           templateUrl: 'templates/avaliacao_especifica.html',
           controller: 'AvEspecificaCtrl',
         }
-      },
-      parent: 'app.avaliacao.geral'
+      }
     })
 
     .state('app.map', {
@@ -143,32 +141,39 @@ app.run(function($ionicPlatform, $rootScope, $location, $window, AuthenticationS
         //redirect only if both isAuthenticated is false and no token is set
         $event.preventDefault();
         $location.path('app.login');
-      } else if (nextRoute == 'app.avaliacao.geral' && currentRoute != 'app.avaliacao') {
+      } else if (nextRoute == 'app.avaliacaogeral' && currentRoute != 'app.avaliacao') {
+        alert("não foi possível ir para app.avaliacao.geral")
         $state.go('app.avaliacao');
-      } else if (nextRoute == 'app.avaliacao.especifica' && currentRoute != 'app.avaliacao.geral') {
+      } else if (nextRoute == 'app.avaliacaoespecifica' && currentRoute != 'app.avaliacaogeral') {
+        alert("não foi possível ir para app.avaliacao.especifica")
         $state.go('app.avaliacao');
       }
     });
 
-    // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-    // for form inputs)
-    if (window.cordova && window.cordova.plugins.Keyboard) {
-      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-      //window.cordova.plugins.Keyboard.disableScroll(true);
-    }
-    if (window.StatusBar) {
-      // org.apache.cordova.statusbar required
-      StatusBar.styleDefault();
-    }
+    document.addEventListener("deviceready", onDeviceReady, false);
 
-    // Enable background mode
-    //cordova.plugins.backgroundMode.enable();
-    // Android customization
-    //cordova.plugins.backgroundMode.configure({
-    //title: "#TrilhaSP",
-    //ticker: "#TrilhaSP rodando em segundo plano",
-    //text: "Rodando em segundo plano. Clique para ativar."
-    //});
+    function onDeviceReady() {
+      console.log("Device Ready");
+      // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+      // for form inputs)
+      if (window.cordova && window.cordova.plugins.Keyboard) {
+        cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+        //window.cordova.plugins.Keyboard.disableScroll(true);
+      }
+      if (window.StatusBar) {
+        // org.apache.cordova.statusbar required
+        StatusBar.styleDefault();
+      }
+
+      // Enable background mode
+      cordova.plugins.backgroundMode.enable();
+      // Android customization
+      cordova.plugins.backgroundMode.configure({
+        title: "#TrilhaSP",
+        ticker: "#TrilhaSP rodando em segundo plano",
+        text: "Rodando em segundo plano. Clique para ativar."
+      });
+    }
 
   });
 });

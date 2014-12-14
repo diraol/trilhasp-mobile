@@ -84,40 +84,7 @@ appControllers.controller('LogoutCtrl', function($state, $window) {
 })
 
 appControllers.controller('AppCtrl', function($scope, $ionicModal, $timeout, $location) {
-  console.log('AppCtrl');
-  //// Form data for the login modal
-  //$scope.loginData = {};
-
-  //// Create the login modal that we will use later
-  //$ionicModal.fromTemplateUrl('templates/login.html', {
-  //scope: $scope
-  //}).then(function(modal) {
-  //$scope.modal = modal;
-  //});
-
-  //// Triggered in the login modal to close it
-  //$scope.closeLogin = function() {
-  //$scope.modal.hide();
-  //};
-
-  //// Open the login modal
-  //$scope.login = function() {
-  //$scope.modal.show();
-  //};
-
-  //// Perform the login action when the user submits the login form
-  //$scope.doLogin = function() {
-  //if ($scope.loginData.username !== undefined && $scope.loginData.password !== undefined) {
-  //UserService
-  //}
-  //console.log('Doing login', $scope.loginData);
-
-  //// Simulate a login delay. Remove this and replace with your login
-  //// code if using a login system
-  //$timeout(function() {
-  //$scope.closeLogin();
-  //}, 1000);
-  //};
+  //console.log('AppCtrl');
 });
 
 appControllers.controller('HomeCtrl', function($scope, $ionicViewService) {
@@ -154,13 +121,12 @@ appControllers.controller('MapCtrl', ['$scope',
     $http,
     $interval
   ) {
-    console.log('MapCtrl');
+    //console.log('MapCtrl');
 
     function populateMap() {
+      //console.log(current_pos); #TODO
       $http.jsonp("http://api.trilhasp.datapublika.com/v1/position/last/?format=jsonp&callback=JSON_CALLBACK")
         .success(function(data) {
-          //console.log(current_pos);
-          console.log("mostrando pessoas ");
           angular.forEach(data.results, function(person) {
             if ($scope.map.markers[person.id]) {
               if ($scope.map.markers[person.id].timestamp != person.properties.timestamp) {
@@ -199,11 +165,6 @@ appControllers.controller('MapCtrl', ['$scope',
 
       $scope.map = {
         markers: {},
-        //defaults: {
-        //tileLayers: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-        //maxZoom: 19,
-        //zoomControlPosition: 'topleft'
-        //},
         events: {
           map: {
             enable: ['context'],
@@ -213,11 +174,13 @@ appControllers.controller('MapCtrl', ['$scope',
       };
 
       angular.extend($scope.map, {
+        SP: {
+          lat: -23.565009,
+          lng: -46.653125,
+          zoom: 18
+        },
         center: {
           autoDiscover: true,
-          // São Paulo
-          //lat: -23.565009,
-          //lng: -46.653125,
           zoom: 18
         },
         layers: {
@@ -274,56 +237,197 @@ appControllers.controller('MapCtrl', ['$scope',
       populateMap();
       autoPopulate();
 
-      //$scope.map.addMarker = function(marker) {
-      //angular.extend($scope.map, {
-      //markers: {
-      //m1: {
-      //lat: 51.505,
-      //lng: -0.09,
-      //message: "I'm a static marker",
-      //},
-      //m2: {
-      //lat: 51,
-      //lng: 0,
-      //focus: true,
-      //message: "<div ng-include src=\"'views/template.html'\"></div>",
-      //draggable: true,
-      //}
-      //}
-      //});
-      //};
-
-      $scope.showusers = function() {
-        //var current_pos = $scope.map.center.lng + "_" + $scope.map.center.lat;
-        $scope.map.markers = populateMap();
-        //$http.jsonp("http://api.trilhasp.datapublika.com/v1/position/last/?format=jsonp&callback=JSON_CALLBACK")
-        //.success(function(data) {
-        ////console.log(current_pos);
-        //var people = $scope.map.markers;
-        //console.log("mostrando pessoas");
-        //angular.forEach(data.results, function(person) {
-        //if (!($scope.map.markers[person.id] && $scope.map.markers[person.id].timestamp == person.properties.timestap)) {
-        //people[person.id] = {
-        //lat: person.geometry.coordinates[1],
-        //lng: person.geometry.coordinates[0],
-        //timestamp: person.properties.timestamp
-        //};
-        //} else {
-        //console.log("Já está sendo exibido");
-        //}
-        //});
-        //$scope.map.markers = people;
-        //})
-        //.error(function(err, status, headers, config) {
-        //console.log("não deu certo");
-        //console.log(status);
-        //console.log(headers);
-        //console.log(config);
-        //console.log(err);
-        //});
-      }
-
-      //$scope.goTo(0);
     });
   }
 ]);
+
+appControllers.controller('AvCtrl', ['$scope', '$state', '$window', 'QRScanService',
+  function($scope, $state, $window, QRScanService) {
+    var evaluation = {
+      busId: 0,
+      general: {
+        value: 50,
+        text: ''
+      },
+      specific: {} // This should be populated based on api request
+    };
+    $scope.click = function() {
+      console.log('Scanning...');
+
+      var promise = QRScanService.scan();
+      promise.then(function(result) {
+          if (!result.error) {
+            evaluation.busId = result.result.text;
+            $window.sessionStorage.evaluation = JSON.stringify(evaluation);
+            $state.go('app.avaliacaogeral', {}, {
+              reload: true
+            });
+            $scope.message = 'ônibus número: ' + result.result.text;
+          } else {
+            $scope.message = '<b>ERROR</b>: ' + result;
+          }
+        },
+        function(result) {
+          $scope.message = '' + result.error;
+        },
+        function(result) {
+          $scope.message = '' + result.error;
+        });
+      $window.sessionStorage.evaluation = JSON.stringify(evaluation);
+      $state.go('app.avaliacaogeral', {}, {
+        reload: true
+      });
+    }
+    $scope.clear = function() {
+      $scope.message = '';
+    }
+  }
+]);
+
+appControllers.controller('AvGeralCtrl', ['$scope', '$state', '$ionicViewService', '$window',
+  function($scope, $state, $ionicViewService, $window) {
+    $ionicViewService.clearHistory();
+    var evaluation = JSON.parse($window.sessionStorage.evaluation);
+    $scope.subTitle = evaluation.busId;
+    $scope.avaliacaoTxtHide = true;
+
+    $scope.fullNote = function(avaliacao) {
+      if (!avaliacao) {
+        $scope.avaliacao = {
+          'value': 100,
+          'text': ''
+        };
+        avaliacao = $scope.avaliacao;
+      } else {
+        avaliacao.value = 100;
+      }
+      $scope.change(avaliacao);
+    };
+
+    $scope.zeroNote = function(avaliacao) {
+      if (!avaliacao) {
+        $scope.avaliacao = {
+          'value': 0,
+          'text': ''
+        };
+        avaliacao = $scope.avaliacao;
+      } else {
+        avaliacao.value = 0;
+      }
+      $scope.change(avaliacao);
+    };
+
+    $scope.change = function(avaliacao) {
+      evaluation.general.value = avaliacao.value;
+      evaluation.general.text = avaliacao.txt || '';
+      if (avaliacao.value >= 50) {
+        $scope.avaliacaoTxtHide = true;
+      } else {
+        $scope.avaliacaoTxtHide = false;
+      }
+    };
+
+    function _save(avaliacao) {
+    }
+
+    $scope.endEval = function(avaliacao) {
+      evaluation.general.value = avaliacao.value;
+      if (evaluation.general.value >= 50) {
+        evaluation.general.text = '';
+      } else {
+        evaluation.general.text = avaliacao.text;
+      }
+      $window.sessionStorage.evaluation = JSON.stringify(evaluation);
+      $state.go('app.home', {}, {
+        reload: true
+      })
+    }
+
+    $scope.nextEval = function(avaliacao) {
+      evaluation.general.value = avaliacao.value;
+      if (evaluation.general.value >= 50) {
+        evaluation.general.text = '';
+      } else {
+        evaluation.general.text = avaliacao.text;
+      }
+      $window.sessionStorage.evaluation = JSON.stringify(evaluation);
+      $state.go('app.avaliacaoespecifica', {}, {
+        reload: true
+      })
+    }
+  }
+]);
+
+appControllers.controller('AvEspecificaCtrl', ['$scope', '$state', '$ionicViewService', '$ionicLoading', '$http', '$window',
+  function($scope, $state, $ionicViewService, $ionicLoading, $http, $window) {
+    $ionicViewService.clearHistory()
+    var evaluation = JSON.parse($window.sessionStorage.evaluation);
+    console.log(evaluation);
+    $scope.subTitle = evaluation.busId;
+
+    $ionicLoading.show({
+      template: 'loading'
+    });
+    $scope.spec = {};
+    $scope.specTxtHide = {};
+    $scope.questions = [];
+
+    $http.jsonp("http://api.trilhasp.datapublika.com/v1/evaluation/question/?format=jsonp&callback=JSON_CALLBACK").then(function(data) {
+        $scope.questions = data.data.results;
+        console.log(JSON.stringify(data.data.results));
+        angular.forEach(data.data.results, function(question) {
+          $scope.spec[question.id] = {
+            id: question.id,
+            question: question.question,
+            value: 50,
+            text: ''
+          };
+          evaluation.specific[question.id] = {
+            value: 50,
+            text: ''
+          }
+          console.log(JSON.stringify(evaluation));
+          $scope.specTxtHide[question.id] = true;
+        });
+        $ionicLoading.hide();
+      },
+      function(err, status, headers, config) {
+        $scope.message = "Erro ao carregar perguntas";
+        $scope.showReload = true;
+        $ionicLoading.hide();
+      });
+
+    $scope.fullNote = function(questionId) {
+      $scope.spec[questionId].value = 100;
+      $scope.change(questionId);
+    };
+
+    $scope.zeroNote = function(questionId) {
+      $scope.spec[questionId].value = 0;
+      $scope.change(questionId);
+    };
+
+    $scope.change = function(questionId) {
+      evaluation.specific[questionId].value = $scope.spec[questionId].value;
+      evaluation.specific[questionId].text = $scope.spec[questionId].text;
+      if ($scope.spec[questionId].value >= 50) {
+        $scope.specTxtHide[questionId] = true;
+      } else {
+        $scope.specTxtHide[questionId] = false;
+      }
+    };
+
+    $scope.endEval = function() {
+      angular.forEach(evaluation.specific, function(quest, key) {
+        if (quest.value >= 50) {
+          evaluation.specific[key].text = '';
+        }
+      })
+      $window.sessionStorage.evaluation = JSON.stringify(evaluation);
+      console.log($window.sessionStorage.evaluation);
+      $state.go('app.home', {}, {
+        reload: true
+      })
+    }
+  }
+])

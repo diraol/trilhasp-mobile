@@ -93,3 +93,21 @@ body {
 .leaflet-control-layers.leaflet-control {
   display: none;
 }
+
+.custom-blue-icon {
+  color: #145fd7;
+}
+
+.range.custom-blue-range input[type=range]::-webkit-slider-thumb:before {
+  background: #145fd7;
+}
+
+div.avaliacao.card {
+  -webkit-transition:all linear 0.3s;
+  transition:all linear 0.3s;
+  opacity:1;
+}
+
+div.avaliacao.card.ng-hide {
+  opacity: 0;
+}
