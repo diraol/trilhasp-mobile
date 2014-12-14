@@ -1,6 +1,6 @@
 <ion-view title="Login">
-  <ion-content class="has-header">
-    <form ng-submit="signIn(user.username, user.password)" role="form">
+  <ion-content class="has-header" ng-controller="UserCtrl">
+    <form ng-submit="submit()" role="form">
       <div class="list">
         <label class="item item-input">
           <span class="input-label">Usuário</span>
@@ -11,7 +11,7 @@
           <input type="password" ng-model="user.password" placeholder="password" id="inputPassword">
         </label>
         <label class="item">
-          <button class="button button-block button-positive" type="submit">Log in</button>
+          <button class="button button-block button-positive" type="submit">Entrar</button>
         </label>
       </div>
     </form>

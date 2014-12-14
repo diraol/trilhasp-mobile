@@ -1,6 +1,78 @@
-appControllers.controller('UserCtrl', ['$scope', '$state', '$location', '$window', 'UserService', 'AuthenticationService',
-  function AdminUserCtrl($scope, $state, $location, $window, UserService, AuthenticationService) {
+appControllers.controller('UserCtrl', ['$scope', '$state', '$http', '$window',
+  function AdminUserCtrl($scope, $state, $http, $window) {
 
+    $scope.user = {
+      username: 'a',
+      password: 'a',
+      grant_type: 'password'
+    };
+    $scope.isAuthenticated = false;
+    $scope.welcome = '';
+    $scope.message = '';
+
+    if ($scope.isAuthenticated) {
+      $state.go('app.home', {}, {
+        reload: true
+      });
+    }
+
+    $scope.submit = function() {
+      $http({
+          url: options.api.auth.base_url,
+          method: 'POST',
+          data: JSON.stringify($scope.user),
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          }
+        })
+        .success(function(data, status, headers, config) {
+          $window.sessionStorage.token = data.access_token;
+          $scope.isAuthenticated = true;
+          console.log("Authenticated");
+          $state.go('app.home', {}, {
+            reload: true
+          });
+        })
+        .error(function(data, status, headers, config) {
+          delete $window.sessionStorage.token;
+          $scope.isAuthenticated = false;
+          console.log('\n\n--------------------------------------');
+          console.log(JSON.stringify(data));
+          console.log('\n\n--------------------------------------');
+          console.log(status);
+          console.log('\n\n--------------------------------------');
+          console.log(JSON.stringify(headers));
+          console.log('\n\n--------------------------------------');
+          console.log(JSON.stringify(config));
+          console.log(config.data.username);
+          console.log('\n\n--------------------------------------');
+          console.log("Erro no login");
+        });
+    };
+
+    $scope.logout = function() {
+      $scope.isAuthenticated = false;
+      delete $window.sessionStorage.token;
+      console.log("logout");
+      $state.go('login', {}, {
+        reload: true
+      });
+    }
+
+    $scope.callRestricted = function() {
+      $http({
+        url: options.api.url + 'game/coin/model/',
+        method: 'GET'
+      }).success(function(data, status, headers, config) {
+        alert("UHUUUUU");
+        console.log(JSON.stringify(data));
+      }).error(function(data, status, headers, config) {
+        alert("Fuck!");
+        console.log(JSON.stringify(data));
+      })
+    }
+
+    /*
     //Admin User Controller (signIn, logOut)
     $scope.signIn = function signIn(username, password) {
       console.log("signIn");
@@ -70,6 +142,7 @@ appControllers.controller('UserCtrl', ['$scope', '$state', '$location', '$window
         });
       }
     }
+   */
   }
 ]);
 
