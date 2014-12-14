@@ -4,28 +4,30 @@
     </ion-nav-buttons>
     <ion-nav-buttons side="right">
     </ion-nav-buttons>
-    <ion-content data-tap-disabled="true" class="has-header" ng-controller="AvEspecificaCtrl">
-        <div style="margin-top: 5px;" ng-bind-html="message"></div>
-        <ion-tabs class="tabs-positive">
-            <ion-tab ng-repeat="quest in spec" title="{{quest.id}}">
-                <h3>Como você avalia:</h3>
-                <label class="item">
-                    <div class="item-content item-text-wrap">{{quest.question}}</div>
-                    <div class="range custom-blue-range">
-                        <i class="icon ion-thumbsdown custom-blue-icon" ng-click="zeroNote({{quest.id}})"></i>
-                        <input type="range" name="spec-{{quest.id}}" id="spec-{{quest.id}}" ng-model='quest.value' class="custom-blue-icon" min="0" max="100" ng-change="change({{quest.id}})">
-                        <i class="icon ion-thumbsup custom-blue-icon" ng-click="fullNote({{question.id}})"></i>
-                    </div>
-                    <div ng-hide="specTxtHide.{{quest.id}}" class="card avaliacao">
-                        <textarea id="text-{{quest.id}}" placeholder="Descreva o motivo da nota negativa." ng-model='quest.text'></textarea>
-                    </div>
-                </label>
-            </ion-tab>
-        </ion-tabs>
-    </ion-content>
-    <ion-footer-bar align-title="right" class="bar-positive">
+    <form novalidate class="simple-form" ng-controller="AvEspecificaCtrl">
+        <ion-content data-tap-disabled="true" class="has-header">
+            <div style="margin-top: 5px;" ng-bind-html="message"></div>
+            <ion-tabs class="tabs-positive">
+                <ion-tab ng-repeat="(id, quest) in questions" title="{{quest.id}}">
+                    <h3>Como você avalia:</h3>
+                    <label class="item">
+                        <div class="item-content item-text-wrap">{{quest.question}}</div>
+                        <div class="range custom-blue-range">
+                            <i class="icon ion-thumbsdown custom-blue-icon" ng-click="zeroNote({{quest.id}})"></i>
+                            <input type="range" ng-model='spec[id].value' class="custom-blue-icon" min="0" max="100" ng-change="change(spec,{{quest.id}})">
+                            <i class="icon ion-thumbsup custom-blue-icon" ng-click="fullNote({{quest.id}})"></i>
+                        </div>
+                        <div ng-hide="txtHide.{{quest.id}}" class="card avaliacao">
+                            <textarea placeholder="Descreva o motivo da nota negativa." ng-model='spec[id].text' ng-change="change(spec,{{quest.id}})"></textarea>
+                        </div>
+                    </label>
+                </ion-tab>
+            </ion-tabs>
+        </ion-content>
+        <ion-footer-bar align-title="right" class="bar-positive">
         <div class="buttons" ng-click="endEval()">
-            <button class="button">Finalizar</button>
-        </div>
-    </ion-footer-bar>
+                <button class="button">Finalizar</button>
+            </div>
+        </ion-footer-bar>
+    </form>
 </ion-view>

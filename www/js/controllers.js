@@ -353,32 +353,27 @@ appControllers.controller('AvEspecificaCtrl', ['$scope', '$state', '$ionicViewSe
   function($scope, $state, $ionicViewService, $ionicLoading, $http, $window) {
     $ionicViewService.clearHistory()
     var evaluation = JSON.parse($window.sessionStorage.evaluation);
-    console.log(evaluation);
     $scope.subTitle = evaluation.busId;
 
     $ionicLoading.show({
       template: 'loading'
     });
-    $scope.spec = {};
-    $scope.specTxtHide = {};
-    $scope.questions = [];
+    $scope.txtHide = {};
+    $scope.questions = {};
 
     $http.jsonp("http://api.trilhasp.datapublika.com/v1/evaluation/question/?format=jsonp&callback=JSON_CALLBACK").then(function(data) {
-        $scope.questions = data.data.results;
-        console.log(JSON.stringify(data.data.results));
-        angular.forEach(data.data.results, function(question) {
-          $scope.spec[question.id] = {
-            id: question.id,
-            question: question.question,
+        angular.forEach(data.data.results, function(item) {
+          $scope.questions[item.id] = {
+            id: item.id,
+            question: item.question,
             value: 50,
             text: ''
           };
-          evaluation.specific[question.id] = {
+          evaluation.specific[item.id] = {
             value: 50,
             text: ''
           }
-          console.log(JSON.stringify(evaluation));
-          $scope.specTxtHide[question.id] = true;
+          $scope.txtHide[item.id] = true;
         });
         $ionicLoading.hide();
       },
@@ -389,33 +384,35 @@ appControllers.controller('AvEspecificaCtrl', ['$scope', '$state', '$ionicViewSe
       });
 
     $scope.fullNote = function(questionId) {
-      $scope.spec[questionId].value = 100;
+      $scope.questions[questionId].value = 100;
       $scope.change(questionId);
     };
 
-    $scope.zeroNote = function(questionId) {
-      $scope.spec[questionId].value = 0;
+    $scope.zeroNote = function(spec, questionId) {
+      $scope.questions[questionId].value = 0;
       $scope.change(questionId);
     };
 
-    $scope.change = function(questionId) {
-      evaluation.specific[questionId].value = $scope.spec[questionId].value;
-      evaluation.specific[questionId].text = $scope.spec[questionId].text;
-      if ($scope.spec[questionId].value >= 50) {
-        $scope.specTxtHide[questionId] = true;
+    $scope.change = function(spec, id) {
+      evaluation.specific[id].value = spec[id].value;
+      evaluation.specific[id].text = spec[id].text;
+      if (spec[id].value >= 50) {
+        $scope.txtHide[id] = true;
       } else {
-        $scope.specTxtHide[questionId] = false;
+        $scope.txtHide[id] = false;
       }
     };
 
-    $scope.endEval = function() {
+    $scope.endEval = function(spec) {
       angular.forEach(evaluation.specific, function(quest, key) {
         if (quest.value >= 50) {
           evaluation.specific[key].text = '';
         }
       })
       $window.sessionStorage.evaluation = JSON.stringify(evaluation);
+      console.log("##### FINAL #####")
       console.log($window.sessionStorage.evaluation);
+      console.log("#################")
       $state.go('app.home', {}, {
         reload: true
       })
