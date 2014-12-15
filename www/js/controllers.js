@@ -1,14 +1,10 @@
-appControllers.controller('UserCtrl', ['$scope', '$state', '$http', '$window',
-  function AdminUserCtrl($scope, $state, $http, $window) {
-
+appControllers.controller('UserCtrl', ['$scope', '$state', '$http', '$window', '$ionicLoading',
+  function($scope, $state, $http, $window, $ionicLoading) {
     $scope.user = {
       username: 'a',
       password: 'a',
       grant_type: 'password'
     };
-    $scope.isAuthenticated = false;
-    $scope.welcome = '';
-    $scope.message = '';
 
     if ($scope.isAuthenticated) {
       $state.go('app.home', {}, {
@@ -16,29 +12,48 @@ appControllers.controller('UserCtrl', ['$scope', '$state', '$http', '$window',
       });
     }
 
-    $scope.submit = function() {
+    $scope.submit = function(formdata) {
+      $ionicLoading.show({
+        template: 'conectando'
+      });
       var basicCredentials = btoa("teste:teste");
       $http.defaults.headers.common['Authorization'] = 'Basic ' + basicCredentials;
 
       $http({
-          url: options.api.auth.base_url,
+          url: options.api.auth.base_url + 'o/token/',
           method: 'POST',
-          data: JSON.stringify($scope.user),
+          data: "grant_type=password&username=" + $scope.user.username + "&password=" + $scope.user.password,
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
           }
         })
         .success(function(data, status, headers, config) {
           $window.sessionStorage.token = data.access_token;
+          $window.sessionStorage.isAuthenticated = true;
+          $window.sessionStorage.username = formdata.username;
           $scope.isAuthenticated = true;
+          $http.get(options.api.base_url + 'user/' + $window.sessionStorage.username + '/?format=json')
+            .success(function(data) {
+              $window.sessionStorage.userId = data.id;
+              console.log(data.id);
+              console.log("Saving userId");
+            }).error(function() {
+              console.log("UserId not saved")
+            });
           console.log("Authenticated");
+          $ionicLoading.hide();
           $state.go('app.home', {}, {
             reload: true
           });
         })
         .error(function(data, status, headers, config) {
           delete $window.sessionStorage.token;
+          delete $window.sessionStorage.isAuthenticated;
+          delete $window.sessionStorage.username;
+          delete $window.sessionStorage.userId;
           $scope.isAuthenticated = false;
+          alert("Falha na conexão");
+          $ionicLoading.hide();
           console.log('\n\n--------------------------------------');
           console.log("data: " + JSON.stringify(data));
           console.log("status: " + status);
@@ -48,115 +63,146 @@ appControllers.controller('UserCtrl', ['$scope', '$state', '$http', '$window',
           console.log("Erro no login");
         });
     };
+  }
+]);
 
-    $scope.logout = function() {
+appControllers.controller('AppCtrl', function($scope, $state, $window, $http, $ionicLoading, $window) {
+
+  //This controller updates user position and also has the logoff functions
+
+  $scope.activeWatch = undefined;
+  $scope.lastPosition = undefined;
+  setupWatch(180000); //Get Position every 30 seconds
+
+  $scope.logout = function() {
+    console.log("logOut");
+    if ($window.sessionStorage.isAuthenticated) {
+      $ionicLoading.show({
+        template: 'Desconectando...'
+      });
+      $window.sessionStorage.isAuthenticated = false;
       $scope.isAuthenticated = false;
       delete $window.sessionStorage.token;
-      console.log("logout");
+      delete $window.sessionStorage.isAuthenticated;
+      delete $window.sessionStorage.username;
+      delete $window.sessionStorage.userId;
+      $http.get(options.api.auth.base_url + 'api-auth/logout/').success(function() {
+        clearInterval($scope.activeWatch);
+        $ionicLoading.hide();
+        $state.go('login', {}, {
+          reload: true
+        });
+      }).error(function() {
+        alert("Falha ao desconectar, tente novamente");
+        $ionicLoading.hide();
+      });
+    } else {
       $state.go('login', {}, {
         reload: true
       });
     }
-
-    $scope.callRestricted = function() {
-      $http({
-        url: options.api.url + 'game/coin/model/',
-        method: 'GET'
-      }).success(function(data, status, headers, config) {
-        alert("UHUUUUU");
-        console.log(JSON.stringify(data));
-      }).error(function(data, status, headers, config) {
-        alert("Fuck!");
-        console.log(JSON.stringify(data));
-      })
-    }
-
-    /*
-    //Admin User Controller (signIn, logOut)
-    $scope.signIn = function signIn(username, password) {
-      console.log("signIn");
-      if (username != null && password != null) {
-        //UserService.signIn(username, password).success(function(data) {
-        //console.log("Sucesso no login");
-        //console.log(data);
-        //AuthenticationService.isAuthenticated = true;
-        //$window.sessionStorage.token = data.access_token;
-        //$location.path("/app/home/");
-        //}).error(function(status, data, headers) {
-        //console.log("erro");
-        //alert(status.error);
-        //alert(data);
-        //console.log(status);
-        //console.log(data);
-        //});
-        AuthenticationService.isAuthenticated = true;
-        $window.sessionStorage.isAuthenticated = true;
-        $window.sessionStorage.token = 'FxUzay';
-        $scope.message = "Teste";
-        $state.go('app.home', {}, {
-          reload: true
-        });
-      }
-    }
-
-    //$scope.logOut = function logOut() {
-    //console.log("logOut");
-    //if (AuthenticationService.isAuthenticated) {
-
-    ////UserService.logOut().success(function(data) {
-    ////AuthenticationService.isAuthenticated = false;
-    ////delete $window.sessionStorage.token;
-    ////$location.path('/login');
-    ////}).error(function(status, data) {
-    ////console.log(status);
-    ////console.log(data);
-    ////});
-    //AuthenticationService.isAuthenticated = false;
-    //$window.sessionStorage.isAuthenticated = false;
-    //delete $window.sessionStorage.token;
-    //$state.go('login', {}, {
-    //reload: true
-    //});
-    //} else {
-    //$state.go('login', {}, {
-    //reload: true
-    //});
-    //}
-    //}
-
-    $scope.register = function register(username, password, passwordConfirm) {
-      console.log("Register");
-      if (AuthenticationService.isAuthenticated) {
-        $state.go('app.home', {}, {
-          reload: true
-        });
-      } else {
-        UserService.register(username, password, passwordConfirm).success(function(data) {
-          $state.go('login', {}, {
-            reload: true
-          });
-        }).error(function(status, data) {
-          console.log(status);
-          console.log(data);
-        });
-      }
-    }
-   */
   }
-]);
 
-appControllers.controller('LogoutCtrl', function($state, $window) {
-  console.log("Saindo fora")
-  AuthenticationService.isAuthenticated = false;
-  $window.sessionStorage.isAuthenticated = false;
-  delete $window.sessionStorage.token;
-  $state.go('login', {}, {
-    reload: true
-  });
-})
+  function setupWatch(freq) {
+    watchLocation();
+    $scope.activeWatch = setInterval(watchLocation, freq);
+  }
 
-appControllers.controller('AppCtrl', function($scope, $ionicModal, $timeout, $location) {
-  //console.log('AppCtrl');
+  function watchLocation() {
+    navigator.geolocation.getCurrentPosition(
+      onGeoSuccess,
+      onGeoError, {
+        maximumAge: 180000,
+        timeout: 360000,
+        enableHighAccuracy: true
+      }
+    )
+  }
+
+  function onGeoSuccess(position) {
+    //post to api
+    //console.log("updating last position:\n " + JSON.stringify(position));
+    if (!$scope.lastPosition ||
+        Math.abs(position.coords.longitude - $scope.lastPosition.longitude) > 0.000 ||
+      Math.abs(position.coords.latitude - $scope.lastPosition.latitude) > 0.000) {
+      $scope.lastPosition = position.coords;
+
+      function build_datetime_now() {
+        var final_date = '',
+          now = new Date();
+
+        final_date = now.getUTCFullYear() + '-';
+        final_date += now.getUTCMonth() + '-';
+        final_date += now.getUTCDay() + 'T';
+        final_date += now.getHours() + ':';
+        final_date += now.getMinutes() + ':';
+        final_date += now.getSeconds();
+        final_date += Math.round(now.getUTCMilliseconds() / 100, 0) + 'Z';
+        return final_date;
+      }
+
+      if (!$window.sessionStorage.userLastPostId) {
+        $http.get(options.api.base_url + 'position/last/user/' + $window.sessionStorage.username + '/?format=json')
+          .success(function(data) {
+            $window.sessionStorage.userLastPostId = data.id;
+          }).error(function(err, status, headers, config) {
+            console.log("User position not recorded");
+            console.log(status);
+            console.log(headers);
+            console.log(JSON.stringify(config));
+            console.log(JSON.stringify(err) + '\n-------------------------------------------------------------\n');
+          });
+      }
+      //Save user position
+      var pos_data = {
+          "id": $window.sessionStorage.userLastPostId,
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [position.coords.longitude, position.coords.latitude]
+          },
+          "properties": {
+            "timestamp": build_datetime_now()
+          }
+        }
+        //Update Last Position
+      $http.put(options.api.base_url + 'position/last/' + $window.sessionStorage.userLastPostId + '/', pos_data).success(function(data) {
+        console.log("Position recorded with PUT: \n" + JSON.stringify(pos_data) + '\n-------------------------------------------------------------\n');
+      }).error(function(err, status, headers, config) {
+        console.log("User position not recorded");
+        console.log(status);
+        console.log(headers);
+        console.log(JSON.stringify(config));
+        console.log(err + '\n-------------------------------------------------------------\n');
+      });
+      var hist_pos_data = {
+          "id": $window.sessionStorage.userId,
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [position.coords.longitude, position.coords.latitude]
+          },
+          "properties": {
+            "user": $window.sessionStorage.userId,
+            "timestamp": build_datetime_now()
+          }
+        }
+        //Update User History
+      $http.post(options.api.base_url + 'position/history/', hist_pos_data).success(function(data) {
+        console.log("Position recorded with PUT: \n" + JSON.stringify(hist_pos_data) + '\n-------------------------------------------------------------\n');
+      }).error(function(err, status, headers, config) {
+        console.log("User position not recorded");
+        console.log(status);
+        console.log(headers);
+        console.log(JSON.stringify(config));
+        console.log(JSON.stringify(err) + '\n-------------------------------------------------------------\n');
+      });
+    }
+  }
+
+  function onGeoError(error) {
+    console.log('code:' + error.code + '\n' + 'message: ' + error.message + '\n');
+  }
 });
 
 appControllers.controller('HomeCtrl', function($scope, $ionicViewService) {
@@ -184,6 +230,8 @@ appControllers.controller('MapCtrl', ['$scope',
   '$ionicPopup',
   '$http',
   '$interval',
+  '$ionicLoading',
+  '$window',
   function(
     $scope,
     $cordovaGeolocation,
@@ -191,12 +239,18 @@ appControllers.controller('MapCtrl', ['$scope',
     $ionicModal,
     $ionicPopup,
     $http,
-    $interval
+    $interval,
+    $ionicLoading,
+    $window
   ) {
     //console.log('MapCtrl');
+    $ionicLoading.show({
+      template: 'Carregando mapa'
+    });
 
     function populateMap() {
       //console.log(current_pos); #TODO
+      //
       $http.jsonp("http://api.trilhasp.datapublika.com/v1/position/last/?format=jsonp&callback=JSON_CALLBACK")
         .success(function(data) {
           angular.forEach(data.results, function(person) {
@@ -217,6 +271,7 @@ appControllers.controller('MapCtrl', ['$scope',
               $scope.map.markers[person.id].timestamp = person.properties.timestamp;
             }
           });
+          $ionicLoading.hide();
         })
         .error(function(err, status, headers, config) {
           console.log("não deu certo");
@@ -224,13 +279,14 @@ appControllers.controller('MapCtrl', ['$scope',
           console.log(headers);
           console.log(config);
           console.log(err);
+          $ionicLoading.hide();
         });
     }
 
     function autoPopulate() {
       $interval(function() {
         populateMap();
-      }, 30000); // Update people position every 30 seconds
+      }, 180000); // Update people position every 30 seconds
     }
 
     $scope.$on("$stateChangeSuccess", function() {
@@ -308,7 +364,6 @@ appControllers.controller('MapCtrl', ['$scope',
 
       populateMap();
       autoPopulate();
-
     });
   }
 ]);

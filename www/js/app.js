@@ -13,7 +13,7 @@ var options = {};
 options.api = {};
 options.api.auth = {}
 options.api.base_url = "http://api.trilhasp.datapublika.com/v1/";
-options.api.auth.base_url = "http://teste:teste@api.trilhasp.datapublika.com/o/token/";
+options.api.auth.base_url = "http://api.trilhasp.datapublika.com/";
 options.api.auth.client_id = "teste";
 options.api.auth.client_secret = "teste";
 
@@ -40,13 +40,6 @@ app.config(['$stateProvider',
       url: '/login',
       templateUrl: 'templates/login.html',
       controller: 'UserCtrl'
-    })
-
-    .state('logout', {
-      url: '/logout',
-      views: {
-        controller: 'LogoutCtrl'
-      }
     })
 
     .state('app.avaliacao', {
@@ -115,24 +108,16 @@ app.config(['$stateProvider',
 ]);
 
 app.config(function($httpProvider) {
-  //AUTH
-  //$httpProvider.defaults.headers.post['Access-Control-Max-Age'] = '1728000';
-
-    $httpProvider.interceptors.push('authInterceptor');
-
+  $httpProvider.interceptors.push('authInterceptor');
   delete $httpProvider.defaults.headers.post['X-Requested-With'];
   $httpProvider.defaults.withCredentials = true;
   $httpProvider.defaults.useXDomain = true;
   $httpProvider.defaults.xsrfCookieName = 'csrftoken';
   $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
   $httpProvider.defaults.headers.post['Accept'] = 'application/json, text/javascript';
-  //$httpProvider.defaults.headers.post['Content-Type'] = 'application/json; charset=utf-8';
-  //$httpProvider.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
-  //$httpProvider.defaults.headers.post['X-Requested-With'] = 'XMLHttpRequest';
-  //$httpProvider.interceptors.push('TokenInterceptor');
 });
 
-app.run(function($ionicPlatform, $rootScope, $location, $window, AuthenticationService, $http, $cookies) {
+app.run(function($ionicPlatform, $rootScope, $location, $window, $http, $cookies) {
   $ionicPlatform.ready(function() {
     //if ($window.sessionStorage.token) {
     //$http.defaults.headers.post['X-CSRFToken'] = $window.sessionStorage.token; //$cookies['csrftoken'];
