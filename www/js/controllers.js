@@ -17,6 +17,9 @@ appControllers.controller('UserCtrl', ['$scope', '$state', '$http', '$window',
     }
 
     $scope.submit = function() {
+      var basicCredentials = btoa("teste:teste");
+      $http.defaults.headers.common['Authorization'] = 'Basic ' + basicCredentials;
+
       $http({
           url: options.api.auth.base_url,
           method: 'POST',
@@ -37,15 +40,11 @@ appControllers.controller('UserCtrl', ['$scope', '$state', '$http', '$window',
           delete $window.sessionStorage.token;
           $scope.isAuthenticated = false;
           console.log('\n\n--------------------------------------');
-          console.log(JSON.stringify(data));
-          console.log('\n\n--------------------------------------');
-          console.log(status);
-          console.log('\n\n--------------------------------------');
-          console.log(JSON.stringify(headers));
-          console.log('\n\n--------------------------------------');
-          console.log(JSON.stringify(config));
-          console.log(config.data.username);
-          console.log('\n\n--------------------------------------');
+          console.log("data: " + JSON.stringify(data));
+          console.log("status: " + status);
+          console.log("headers: " + JSON.stringify(headers));
+          console.log("config: " + JSON.stringify(config));
+          console.log('\n--------------------------------------');
           console.log("Erro no login");
         });
     };
