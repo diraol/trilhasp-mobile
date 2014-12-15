@@ -543,31 +543,43 @@ appControllers.controller('AvGeralCtrl', [
 
 appControllers.controller('AvEspecificaCtrl', ['$scope', '$state', '$ionicViewService', '$ionicLoading', '$http', '$window',
   function($scope, $state, $ionicViewService, $ionicLoading, $http, $window) {
-    $ionicViewService.clearHistory()
-    var evaluation = JSON.parse($window.sessionStorage.evaluation);
-    $scope.subTitle = evaluation.busId;
+    $ionicViewService.clearHistory();
     $ionicLoading.show({
       template: 'loading'
     });
+    var evaluation = JSON.parse($window.sessionStorage.evaluation);
+    $scope.subTitle = evaluation.busId;
     $scope.txtHide = {};
-    $scope.questions = {};
+    $scope.questions = {
+      values: {},
+      texts: {},
+      headers: {},
+      ids: {}
+    };
 
     $http.jsonp(options.api.base_url + "/evaluation/question/?format=jsonp&callback=JSON_CALLBACK").then(function(data) {
-        angular.forEach(data.data.results, function(item) {
+        console.log("\n");
+        console.log(JSON.stringify(data.data.results));
+        console.log("\n");
+        console.log("\n");
+        var local_counter = 0;
+        angular.forEach(data.data.results, function(item, index) {
           if (item.id != 1) {
-            $scope.questions[item.id] = {
-              id: item.id,
-              question: item.question,
-              value: 50,
-              text: ''
-            };
+            console.log(local_counter + ": " + JSON.stringify(item));
+            $scope.questions.values[local_counter] = 50;
+            $scope.questions.texts[local_counter] = '';
+            $scope.questions.headers[local_counter] = item.question;
+            $scope.questions.ids[local_counter] = item.id
             evaluation.specific[item.id] = {
               value: 50,
               text: ''
             }
-            $scope.txtHide[item.id] = true;
+            $scope.txtHide[local_counter] = true;
+            local_counter++;
           }
         });
+        console.log("\n");
+        console.log("Questions: " + JSON.stringify($scope.questions) + "\n");
         $ionicLoading.hide();
       },
       function(err, status, headers, config) {
@@ -576,25 +588,58 @@ appControllers.controller('AvEspecificaCtrl', ['$scope', '$state', '$ionicViewSe
         $ionicLoading.hide();
       });
 
-    $scope.fullNote = function(questionId) {
-      $scope.questions[questionId].value = 100;
-      $scope.change(questionId);
+    $scope.fullNote = function(index) {
+      $scope.questions.values[index] = 100;
+      $scope.change(index);
     };
 
-    $scope.zeroNote = function(spec, questionId) {
-      $scope.questions[questionId].value = 0;
-      $scope.change(questionId);
+    $scope.zeroNote = function(index) {
+      $scope.questions.values[index] = 0;
+      $scope.change(index);
     };
 
-    $scope.change = function(spec, id) {
-      evaluation.specific[id].value = spec[id].value;
-      evaluation.specific[id].text = spec[id].text;
-      if (spec[id].value >= 50) {
-        $scope.txtHide[id] = true;
+    $scope.change = function(index) {
+      var id = $scope.questions.ids[index];
+      evaluation.specific[id].value = $scope.questions.values[index];
+      evaluation.specific[id].text = $scope.questions.texts[index];
+      if ($scope.questions.values[index] >= 50) {
+        $scope.txtHide[index] = true;
       } else {
-        $scope.txtHide[id] = false;
+        $scope.txtHide[index] = false;
       }
     };
+
+    function save_data(user_location, destination) {
+      angular.forEach(evaluation.specific, function(quest, key) {
+        var data = {
+          question: 'http://api.trilhasp.datapublika.com/v1/evaluation/question/' + key + '/',
+          user: 'http://api.trilhasp.datapublika.com/v1/user/' + $window.sessionStorage.username + '/',
+          timestamp: build_datetime_now(),
+          bus_unique_number: 'http://api.trilhasp.datapublika.com/v1/evaluation/bus/' + evaluation.busId + '/',
+          answer_value: quest.value,
+          answer_text: quest.text,
+          geolocation: user_location
+        }
+        $http.post(options.api.base_url + 'evaluation/answer/', data).success(function() {
+          console.log('specific questions ' + key + 'saved');
+          $window.sessionStorage.evaluation = JSON.stringify(evaluation);
+          delete evaluation.specific[key];
+          if (Object.keys(evaluation.specific).length <= 0) {
+            delete $window.sessionStorage.evaluation;
+            $state.go(destination, {}, {
+              reload: true
+            })
+          }
+        }).error(function(err, status, headers, config) {
+          console.log("User specific evaluation for question " + key + " not recorded");
+          console.log(status);
+          console.log(headers);
+          console.log(JSON.stringify(config));
+          //console.log(err + '\n-------------------------------------------------------------\n');
+          alert('Nem todos os dados foram salvos, por favor tente novamente');
+        });
+      });
+    }
 
     $scope.endEval = function(spec) {
       angular.forEach(evaluation.specific, function(quest, key) {
@@ -602,13 +647,21 @@ appControllers.controller('AvEspecificaCtrl', ['$scope', '$state', '$ionicViewSe
           evaluation.specific[key].text = '';
         }
       })
-      $window.sessionStorage.evaluation = JSON.stringify(evaluation);
-      console.log("##### FINAL #####")
-      console.log($window.sessionStorage.evaluation);
-      console.log("#################")
-      $state.go('app.home', {}, {
-        reload: true
-      })
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          console.log(JSON.stringify(position));
+          save_data("POINT (" + position.coords.longitude + " " + position.coords.latitude + ")", 'app.home');
+        },
+        function(error) {
+          console.log("Location error " + error);
+          save_data("POINT (-46.6361100000000022 -23.5474999999999994)", 'app.home');
+        }, {
+          maximumAge: 180000,
+          timeout: 360000,
+          enableHighAccuracy: true
+        }
+      );
     }
   }
 ])
