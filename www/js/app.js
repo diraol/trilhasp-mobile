@@ -17,6 +17,20 @@ options.api.auth.base_url = "http://api.trilhasp.datapublika.com/";
 options.api.auth.client_id = "teste";
 options.api.auth.client_secret = "teste";
 
+function build_datetime_now() {
+  var final_date = '',
+    now = new Date();
+
+  final_date = now.getUTCFullYear() + '-';
+  final_date += now.getUTCMonth() + '-';
+  final_date += now.getUTCDay() + 'T';
+  final_date += now.getHours() + ':';
+  final_date += now.getMinutes() + ':';
+  final_date += now.getSeconds();
+  final_date += Math.round(now.getUTCMilliseconds() / 100, 0) + 'Z';
+  return final_date;
+}
+
 app.config(['$stateProvider',
   '$locationProvider',
   '$httpProvider',

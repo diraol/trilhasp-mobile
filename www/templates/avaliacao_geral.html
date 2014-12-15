@@ -21,7 +21,8 @@
                 <label class="item item-input">
                     <textarea id="avaliacao-geral-text" placeholder="Descreva o motivo da nota negativa." ng-model='avaliacao.text' ng-change="change(avaliacao)"></textarea>
                 </label>
-            </div>
+              </div>
+              <div ng-bind-html="message" class="bar-assertive"></div>
         </ion-content>
         <ion-footer-bar align-title="center" class="bar-positive">
             <div class="buttons" ng-click="endEval(avaliacao)">

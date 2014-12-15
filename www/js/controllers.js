@@ -123,7 +123,7 @@ appControllers.controller('AppCtrl', function($scope, $state, $window, $http, $i
     //post to api
     //console.log("updating last position:\n " + JSON.stringify(position));
     if (!$scope.lastPosition ||
-        Math.abs(position.coords.longitude - $scope.lastPosition.longitude) > 0.000 ||
+      Math.abs(position.coords.longitude - $scope.lastPosition.longitude) > 0.000 ||
       Math.abs(position.coords.latitude - $scope.lastPosition.latitude) > 0.000) {
       $scope.lastPosition = position.coords;
 
@@ -251,7 +251,7 @@ appControllers.controller('MapCtrl', ['$scope',
     function populateMap() {
       //console.log(current_pos); #TODO
       //
-      $http.jsonp("http://api.trilhasp.datapublika.com/v1/position/last/?format=jsonp&callback=JSON_CALLBACK")
+      $http.jsonp(options.api.base_url + "position/last/?format=jsonp&callback=JSON_CALLBACK")
         .success(function(data) {
           angular.forEach(data.results, function(person) {
             if ($scope.map.markers[person.id]) {
@@ -368,8 +368,20 @@ appControllers.controller('MapCtrl', ['$scope',
   }
 ]);
 
-appControllers.controller('AvCtrl', ['$scope', '$state', '$window', 'QRScanService',
-  function($scope, $state, $window, QRScanService) {
+appControllers.controller('AvCtrl', [
+  '$scope',
+  '$state',
+  '$window',
+  'QRScanService',
+  '$http',
+  '$ionicLoading',
+  function(
+    $scope,
+    $state,
+    $window,
+    QRScanService,
+    $http,
+    $ionicLoading) {
     var evaluation = {
       busId: 0,
       general: {
@@ -384,12 +396,24 @@ appControllers.controller('AvCtrl', ['$scope', '$state', '$window', 'QRScanServi
       var promise = QRScanService.scan();
       promise.then(function(result) {
           if (!result.error) {
-            evaluation.busId = result.result.text;
-            $window.sessionStorage.evaluation = JSON.stringify(evaluation);
-            $state.go('app.avaliacaogeral', {}, {
-              reload: true
+            $ionicLoading.show({
+              template: 'Buscando ônibus' + result.result.text
             });
-            $scope.message = 'ônibus número: ' + result.result.text;
+            $http.get(options.api.base_url + "/evaluation/bus/" + result.result.text + "/?format=json")
+              .success(function(data) {
+                //TODO: Check bus active
+                evaluation.busId = result.result.text;
+                evaluation.busLine = data.bus_line_code.split(" ")[0];
+                $window.sessionStorage.evaluation = JSON.stringify(evaluation);
+                $ionicLoading.hide();
+                $state.go('app.avaliacaogeral', {}, {
+                  reload: true
+                });
+              })
+              .error(function() {
+                $ionicLoading.hide();
+                $scope.message = '<b>ERRO</b>: ônibus não encontrado';
+              })
           } else {
             $scope.message = '<b>ERROR</b>: ' + result;
           }
@@ -400,10 +424,6 @@ appControllers.controller('AvCtrl', ['$scope', '$state', '$window', 'QRScanServi
         function(result) {
           $scope.message = '' + result.error;
         });
-      $window.sessionStorage.evaluation = JSON.stringify(evaluation);
-      $state.go('app.avaliacaogeral', {}, {
-        reload: true
-      });
     }
     $scope.clear = function() {
       $scope.message = '';
@@ -411,11 +431,22 @@ appControllers.controller('AvCtrl', ['$scope', '$state', '$window', 'QRScanServi
   }
 ]);
 
-appControllers.controller('AvGeralCtrl', ['$scope', '$state', '$ionicViewService', '$window',
-  function($scope, $state, $ionicViewService, $window) {
+appControllers.controller('AvGeralCtrl', [
+  '$scope',
+  '$state',
+  '$ionicViewService',
+  '$window',
+  '$http',
+  function(
+    $scope,
+    $state,
+    $ionicViewService,
+    $window,
+    $http) {
+
     $ionicViewService.clearHistory();
     var evaluation = JSON.parse($window.sessionStorage.evaluation);
-    $scope.subTitle = evaluation.busId;
+    $scope.subTitle = evaluation.busId + " (" + evaluation.busLine + ")";
     $scope.avaliacaoTxtHide = true;
 
     $scope.fullNote = function(avaliacao) {
@@ -454,24 +485,58 @@ appControllers.controller('AvGeralCtrl', ['$scope', '$state', '$ionicViewService
       }
     };
 
-    $scope.endEval = function(avaliacao) {
-      if (evaluation.general.value >= 50) {
-        evaluation.general.text = '';
+    function save_data(user_location, destination) {
+      var data = {
+        question: 'http://api.trilhasp.datapublika.com/v1/evaluation/question/1/',
+        user: 'http://api.trilhasp.datapublika.com/v1/user/' + $window.sessionStorage.username + '/',
+        timestamp: build_datetime_now(),
+        bus_unique_number: 'http://api.trilhasp.datapublika.com/v1/evaluation/bus/' + evaluation.busId + '/',
+        answer_value: evaluation.general.value,
+        answer_text: evaluation.general.text,
+        geolocation: user_location
       }
-      $window.sessionStorage.evaluation = JSON.stringify(evaluation);
-      $state.go('app.home', {}, {
-        reload: true
+      $http.post(options.api.base_url + 'evaluation/answer/', data).success(function() {
+        console.log('general question saved');
+        $window.sessionStorage.evaluation = JSON.stringify(evaluation);
+        $state.go(destination, {}, {
+          reload: true
+        })
+      }).error(function(err, status, headers, config) {
+        console.log("User general evaluation not recorded");
+        console.log(status);
+        console.log(headers);
+        console.log(JSON.stringify(config));
+        //console.log(err + '\n-------------------------------------------------------------\n');
       })
     }
 
-    $scope.nextEval = function(avaliacao) {
+    function saveEvaluation(destination) {
       if (evaluation.general.value >= 50) {
         evaluation.general.text = '';
       }
-      $window.sessionStorage.evaluation = JSON.stringify(evaluation);
-      $state.go('app.avaliacaoespecifica', {}, {
-        reload: true
-      })
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          console.log(JSON.stringify(position));
+          save_data("POINT (" + position.coords.longitude + " " + position.coords.latitude + ")", destination);
+        },
+        function(error) {
+          console.log("Location error " + error);
+          save_data("POINT (-46.6361100000000022 -23.5474999999999994)", destination);
+        }, {
+          maximumAge: 180000,
+          timeout: 360000,
+          enableHighAccuracy: true
+        }
+      );
+    }
+
+    $scope.endEval = function(avaliacao) {
+      saveEvaluation('app.home');
+    }
+
+    $scope.nextEval = function(avaliacao) {
+      saveEvaluation('app.avaliacaoespecifica');
     }
   }
 ]);
@@ -481,26 +546,27 @@ appControllers.controller('AvEspecificaCtrl', ['$scope', '$state', '$ionicViewSe
     $ionicViewService.clearHistory()
     var evaluation = JSON.parse($window.sessionStorage.evaluation);
     $scope.subTitle = evaluation.busId;
-
     $ionicLoading.show({
       template: 'loading'
     });
     $scope.txtHide = {};
     $scope.questions = {};
 
-    $http.jsonp("http://api.trilhasp.datapublika.com/v1/evaluation/question/?format=jsonp&callback=JSON_CALLBACK").then(function(data) {
+    $http.jsonp(options.api.base_url + "/evaluation/question/?format=jsonp&callback=JSON_CALLBACK").then(function(data) {
         angular.forEach(data.data.results, function(item) {
-          $scope.questions[item.id] = {
-            id: item.id,
-            question: item.question,
-            value: 50,
-            text: ''
-          };
-          evaluation.specific[item.id] = {
-            value: 50,
-            text: ''
+          if (item.id != 1) {
+            $scope.questions[item.id] = {
+              id: item.id,
+              question: item.question,
+              value: 50,
+              text: ''
+            };
+            evaluation.specific[item.id] = {
+              value: 50,
+              text: ''
+            }
+            $scope.txtHide[item.id] = true;
           }
-          $scope.txtHide[item.id] = true;
         });
         $ionicLoading.hide();
       },
