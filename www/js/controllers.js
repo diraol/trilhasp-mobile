@@ -66,13 +66,75 @@ appControllers.controller('UserCtrl', ['$scope', '$state', '$http', '$window', '
   }
 ]);
 
-appControllers.controller('AppCtrl', function($scope, $state, $window, $http, $ionicLoading, $window) {
+appControllers.controller('AppCtrl', function($scope, $state, $window, $http, $ionicLoading, $window, $ionicPopup) {
 
   //This controller updates user position and also has the logoff functions
 
   $scope.activeWatch = undefined;
   $scope.lastPosition = undefined;
-  setupWatch(180000); //Get Position every 30 seconds
+  setupWatch(20000); //Get Position every 20 seconds
+
+    //TODO: Temporary while there is no game module
+    //TODO: Temporary while there is no game module
+    // Triggered on a button click, or some other target
+  $scope.showPopup = function() {
+    $scope.data = {}
+
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+      template: '<input type="password" ng-model="data.wifi">',
+      title: 'Enter Wi-Fi Password',
+      subTitle: 'Please use normal things',
+      scope: $scope,
+      buttons: [{
+        text: 'Cancel'
+      }, {
+        text: '<b>Save</b>',
+        type: 'button-positive',
+        onTap: function(e) {
+          if (!$scope.data.wifi) {
+            //don't allow the user to close unless he enters wifi password
+            e.preventDefault();
+          } else {
+            return $scope.data.wifi;
+          }
+        }
+      }, ]
+    });
+    myPopup.then(function(res) {
+      console.log('Tapped!', res);
+    });
+    $timeout(function() {
+      myPopup.close(); //close the popup after 3 seconds for some reason
+    }, 3000);
+  };
+  // A confirm dialog
+  $scope.showConfirm = function() {
+    var confirmPopup = $ionicPopup.confirm({
+      title: 'Consume Ice Cream',
+      template: 'Are you sure you want to eat this ice cream?'
+    });
+    confirmPopup.then(function(res) {
+      if (res) {
+        console.log('You are sure');
+      } else {
+        console.log('You are not sure');
+      }
+    });
+  };
+
+  // An alert dialog
+  $scope.showGameAlert = function() {
+    var alertPopup = $ionicPopup.alert({
+      title: 'Olá jogador(a)!',
+      template: '<center>Nosso jogo está em desenvolvimento e estará disponível em janeiro de 2015</center>'
+    });
+    alertPopup.then(function(res) {
+      console.log('Thank you for not eating my delicious ice cream cone');
+    });
+  };
+  //TODO: Temporary while there is no game module
+  //TODO: Temporary while there is no game module
 
   $scope.logout = function() {
     console.log("logOut");
@@ -123,8 +185,8 @@ appControllers.controller('AppCtrl', function($scope, $state, $window, $http, $i
     //post to api
     //console.log("updating last position:\n " + JSON.stringify(position));
     if (!$scope.lastPosition ||
-      Math.abs(position.coords.longitude - $scope.lastPosition.longitude) > 0.000 ||
-      Math.abs(position.coords.latitude - $scope.lastPosition.latitude) > 0.000) {
+      Math.abs(position.coords.longitude - $scope.lastPosition.longitude) > 0.002 ||
+      Math.abs(position.coords.latitude - $scope.lastPosition.latitude) > 0.002) {
       $scope.lastPosition = position.coords;
 
       function build_datetime_now() {
@@ -205,8 +267,70 @@ appControllers.controller('AppCtrl', function($scope, $state, $window, $http, $i
   }
 });
 
-appControllers.controller('HomeCtrl', function($scope, $ionicViewService) {
-  $ionicViewService.clearHistory()
+appControllers.controller('HomeCtrl', function($scope, $ionicViewService, $ionicPopup) {
+  $ionicViewService.clearHistory();
+    //TODO: Temporary while there is no game module
+    //TODO: Temporary while there is no game module
+    // Triggered on a button click, or some other target
+  $scope.showPopup = function() {
+    $scope.data = {}
+
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+      template: '<input type="password" ng-model="data.wifi">',
+      title: 'Enter Wi-Fi Password',
+      subTitle: 'Please use normal things',
+      scope: $scope,
+      buttons: [{
+        text: 'Cancel'
+      }, {
+        text: '<b>Save</b>',
+        type: 'button-positive',
+        onTap: function(e) {
+          if (!$scope.data.wifi) {
+            //don't allow the user to close unless he enters wifi password
+            e.preventDefault();
+          } else {
+            return $scope.data.wifi;
+          }
+        }
+      }, ]
+    });
+    myPopup.then(function(res) {
+      console.log('Tapped!', res);
+    });
+    $timeout(function() {
+      myPopup.close(); //close the popup after 3 seconds for some reason
+    }, 3000);
+  };
+  // A confirm dialog
+  $scope.showConfirm = function() {
+    var confirmPopup = $ionicPopup.confirm({
+      title: 'Consume Ice Cream',
+      template: 'Are you sure you want to eat this ice cream?'
+    });
+    confirmPopup.then(function(res) {
+      if (res) {
+        console.log('You are sure');
+      } else {
+        console.log('You are not sure');
+      }
+    });
+  };
+
+  // An alert dialog
+  $scope.showGameAlert = function() {
+    var alertPopup = $ionicPopup.alert({
+      title: 'Olá jogador(a)!',
+      template: '<center>Nosso jogo está em desenvolvimento e estará disponível em janeiro de 2015</center>'
+    });
+    alertPopup.then(function(res) {
+      console.log('Thank you for not eating my delicious ice cream cone');
+    });
+  };
+  //TODO: Temporary while there is no game module
+  //TODO: Temporary while there is no game module
+
   $scope.showLogin = false;
   $scope.items = [{
     title: 'Avaliação',
@@ -216,11 +340,7 @@ appControllers.controller('HomeCtrl', function($scope, $ionicViewService) {
     title: 'Mapa',
     url: 'map',
     logo: 'ion-map'
-  }, {
-    title: 'Game',
-    url: 'game',
-    logo: 'ion-android-bus'
-  }, ]
+  }]
 });
 
 appControllers.controller('MapCtrl', ['$scope',
@@ -665,3 +785,7 @@ appControllers.controller('AvEspecificaCtrl', ['$scope', '$state', '$ionicViewSe
     }
   }
 ])
+
+appControllers.controller('GameCtrl', function() {
+
+})

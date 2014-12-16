@@ -7,6 +7,9 @@
       <ion-item ng-repeat="item in items" href="#/app/{{item.url}}">
         <i class="icon {{item.logo}}"></i> {{item.title}}
       </ion-item>
+      <ion-item ng-click="showGameAlert()" href>
+        <i class="icon ion-android-bus"></i> Game
+      </ion-item>
     </ion-list>
   </ion-content>
 </ion-view>
